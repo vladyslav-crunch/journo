@@ -1,9 +1,15 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z.string().email("Invalid email address."),
+  password: z.string().min("Invalid password.", 6),
+});
 
 export const register = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = authSchema.parse(req.body);
 
     const existing = await User.findOne({ email });
     if (existing)
@@ -14,6 +20,9 @@ export const register = async (req, res) => {
 
     res.status(201).json({ message: "User created." });
   } catch (err) {
+    if (err.name === "ZodError") {
+      return res.status(400).json({ message: err.errors[0].message });
+    }
     console.error("Register error:", err);
     res.status(500).json({ message: "Registration failed." });
   }
@@ -21,7 +30,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = authSchema.parse(req.body);
 
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
@@ -34,6 +43,9 @@ export const login = async (req, res) => {
 
     res.json({ token });
   } catch (err) {
+    if (err.name === "ZodError") {
+      return res.status(400).json({ message: err.errors[0].message });
+    }
     console.error("Login error:", err);
     res.status(500).json({ message: "Login failed." });
   }

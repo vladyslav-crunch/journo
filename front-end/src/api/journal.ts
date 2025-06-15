@@ -1,4 +1,9 @@
-const API_URL = "http://localhost:5000/api";
+import type {
+  JournalEntryCreate,
+  JournalEntryUpdate,
+} from "../types/JournalEntry";
+
+const API_URL = "/api";
 
 export const loginUser = async (credentials: {
   email: string;
@@ -31,10 +36,7 @@ export const fetchEntries = async (token: string) => {
   return res.json();
 };
 
-export const createEntry = async (
-  token: string,
-  entry: { title: string; content: string }
-) => {
+export const createEntry = async (token: string, entry: JournalEntryCreate) => {
   const res = await fetch(`${API_URL}/journals`, {
     method: "POST",
     headers: {
@@ -49,7 +51,7 @@ export const createEntry = async (
 export const updateEntry = async (
   token: string,
   id: string,
-  entry: { title: string; content: string }
+  entry: JournalEntryUpdate
 ) => {
   const res = await fetch(`${API_URL}/journals/${id}`, {
     method: "PUT",
