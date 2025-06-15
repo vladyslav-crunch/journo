@@ -33,6 +33,11 @@ export const fetchEntries = async (token: string) => {
   const res = await fetch(`${API_URL}/journals`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
+  if (res.status === 401) {
+    throw new Error("Unauthorized");
+  }
+
   return res.json();
 };
 
@@ -69,4 +74,17 @@ export const deleteEntry = async (token: string, id: string) => {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
+};
+
+// api/auth.ts
+export const validateToken = async (token: string) => {
+  const res = await fetch(`${API_URL}/auth/validate`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status === 401) throw new Error("Unauthorized");
+
+  return res.json(); // e.g., return user info
 };

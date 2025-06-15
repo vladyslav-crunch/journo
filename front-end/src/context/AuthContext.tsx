@@ -1,41 +1,59 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface AuthContextType {
+import { validateToken } from "../api/journal";
+import { type ReactNode } from "react";
+type AuthContextType = {
+  user: any;
   token: string | null;
   login: (token: string) => void;
   logout: () => void;
-}
+};
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  token: null,
+  login: () => {},
+  logout: () => {},
+});
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("token")
-  );
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const navigate = useNavigate();
 
   const login = (newToken: string) => {
-    localStorage.setItem("token", newToken);
     setToken(newToken);
-    navigate("/dashboard");
+    navigate("/");
+    localStorage.setItem("token", newToken);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    setUser(null);
     setToken(null);
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
+  useEffect(() => {
+    const checkToken = async () => {
+      if (!token) return;
+
+      try {
+        const userData = await validateToken(token);
+        setUser(userData);
+      } catch {
+        logout();
+      }
+    };
+
+    checkToken();
+  }, [token]);
+
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within AuthProvider");
-  return context;
-};
+export const useAuth = () => useContext(AuthContext); // ✅ export this

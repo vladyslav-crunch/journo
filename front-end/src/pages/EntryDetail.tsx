@@ -42,7 +42,7 @@ export default function EntryDetail() {
 
     fetchEntries(token).then((entries) => {
       const found = entries.find((e: JournalEntry) => e._id === id);
-      if (!found) return navigate("/dashboard");
+      if (!found) return navigate("/");
 
       setEntry(found);
       setTitle(found.title);
@@ -94,7 +94,7 @@ export default function EntryDetail() {
     try {
       await deleteEntry(token, id);
       toast.success("Entry deleted.");
-      navigate("/dashboard");
+      navigate("/");
     } catch {
       toast.error("Failed to delete entry.");
     }

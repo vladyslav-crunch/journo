@@ -12,7 +12,7 @@ export default function EntryToolbar({
   return (
     <div className="flex justify-between items-center mb-6">
       <button
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate("/")}
         className="text-sm text-gray-600 hover:underline cursor-pointer"
       >
         ← Back to Dashboard

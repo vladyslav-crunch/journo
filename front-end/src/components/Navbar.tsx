@@ -14,7 +14,7 @@ const Navbar: React.FC = () => {
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         {/* Logo / App Name */}
         <Link
-          to="/dashboard"
+          to="/"
           className="text-2xl font-semibold text-indigo-600 hover:text-indigo-800 transition"
         >
           Journo

@@ -35,7 +35,7 @@ export default function App() {
               </PrivateRoute>
             }
           >
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="entries/:id" element={<EntryDetail />} />
           </Route>
         </Routes>
