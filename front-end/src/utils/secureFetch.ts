@@ -1,5 +1,4 @@
-// utils/secureFetch.ts
-import { logoutFromContext } from "./logoutHelper"; // You implement this
+import { logoutFromContext } from "./logoutHelper";
 
 export const secureFetch = async (
   input: RequestInfo,

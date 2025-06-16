@@ -22,7 +22,7 @@ export default function Register() {
   );
   const [serverError, setServerError] = useState("");
 
-  const { login } = useAuth(); // ✅ get login from context
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,10 +42,8 @@ export default function Register() {
 
     try {
       const res = await registerUser({ email, password });
-
-      // ✅ If backend returns a token
       if (res.token) {
-        login(res.token); // Automatically logs in and redirects
+        login(res.token); 
       } else {
         setServerError(res.message || "Registration failed");
       }
