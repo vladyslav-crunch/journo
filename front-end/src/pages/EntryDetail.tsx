@@ -2,11 +2,12 @@ import EntryToolbar from "../components/EntryDetail/EntryToolbar";
 import EntryTitle from "../components/EntryDetail/EntryTitle";
 import EntryContent from "../components/EntryDetail/EntryContent";
 import EntryDateInput from "../components/EntryDetail/EntryDateInput";
+import EntryTimeInput from "../components/EntryDetail/EntryTimeInput";
 import EntryActions from "../components/EntryDetail/EntryActions";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { fetchEntries, updateEntry, deleteEntry } from "../api/journal";
+import { updateEntry, deleteEntry, fetchEntry } from "../api/journal";
 import type { JournalEntry } from "../types/JournalEntry";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -14,8 +15,11 @@ import { z } from "zod";
 const entrySchema = z.object({
   title: z.string().min(1, "Title is required."),
   content: z.string().min(1, "Content is required."),
-  createdAt: z.string().refine((val) => !isNaN(new Date(val).getTime()), {
-    message: "Valid creation date is required.",
+  createdDate: z.string().refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
+    message: "Valid date is required.",
+  }),
+  createdTime: z.string().refine((val) => /^\d{2}:\d{2}$/.test(val), {
+    message: "Valid time is required.",
   }),
 });
 
@@ -29,30 +33,49 @@ export default function EntryDetail() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [createdAt, setCreatedAt] = useState("");
+  const [createdDate, setCreatedDate] = useState("");
+  const [createdTime, setCreatedTime] = useState("");
 
   const [errors, setErrors] = useState<{
     title?: string;
     content?: string;
-    createdAt?: string;
+    createdDate?: string;
+    createdTime?: string;
   }>({});
 
   useEffect(() => {
     if (!token || !id) return;
 
-    fetchEntries(token).then((entries) => {
-      const found = entries.find((e: JournalEntry) => e._id === id);
-      if (!found) return navigate("/");
+    fetchEntry(token, id)
+      .then((found) => {
+        setEntry(found);
+        setTitle(found.title);
+        setContent(found.content);
 
-      setEntry(found);
-      setTitle(found.title);
-      setContent(found.content);
-      setCreatedAt(new Date(found.createdAt).toISOString().slice(0, 10));
-    });
+        const created = new Date(found.createdAt);
+        setCreatedDate(created.toLocaleDateString("sv-SE"));
+        setCreatedTime(
+          created.toLocaleTimeString("sv-SE", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          })
+        );
+      })
+      .catch(() => {
+        toast.error("Failed to load entry.");
+        navigate("/");
+      });
   }, [token, id, navigate]);
 
   const validate = () => {
-    const result = entrySchema.safeParse({ title, content, createdAt });
+    const result = entrySchema.safeParse({
+      title,
+      content,
+      createdDate,
+      createdTime,
+    });
+
     if (!result.success) {
       const zodErrors: typeof errors = {};
       for (const issue of result.error.issues) {
@@ -73,11 +96,12 @@ export default function EntryDetail() {
     }
 
     try {
-      const isoDate = new Date(createdAt + "T00:00:00.000Z");
+      const localDateTime = new Date(`${createdDate}T${createdTime}`);
+
       const updated = await updateEntry(token, id, {
         title,
         content,
-        createdAt: isoDate,
+        createdAt: localDateTime,
       });
 
       setEntry(updated);
@@ -104,7 +128,9 @@ export default function EntryDetail() {
     if (!entry) return;
     setTitle(entry.title);
     setContent(entry.content);
-    setCreatedAt(new Date(entry.createdAt).toISOString().slice(0, 10));
+    const created = new Date(entry.createdAt);
+    setCreatedDate(created.toISOString().slice(0, 10));
+    setCreatedTime(created.toISOString().slice(11, 16));
     setErrors({});
     setIsEditing(false);
   };
@@ -134,9 +160,16 @@ export default function EntryDetail() {
 
         <EntryDateInput
           isEditing={isEditing}
-          createdAt={createdAt}
-          onChange={setCreatedAt}
-          error={errors.createdAt}
+          createdAt={createdDate}
+          onChange={setCreatedDate}
+          error={errors.createdDate}
+        />
+
+        <EntryTimeInput
+          isEditing={isEditing}
+          createdTime={createdTime}
+          onChange={setCreatedTime}
+          error={errors.createdTime}
         />
 
         {isEditing && (

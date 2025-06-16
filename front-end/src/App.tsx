@@ -25,8 +25,6 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
-          {/* Outer route for authenticated layout */}
           <Route
             path="/"
             element={

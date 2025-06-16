@@ -20,7 +20,7 @@ export default function JournalForm({ onSave }: Props) {
     Partial<Record<keyof JournalEntryCreate, string>>
   >({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const result = journalSchema.safeParse({ title, content });
@@ -38,11 +38,11 @@ export default function JournalForm({ onSave }: Props) {
     }
 
     try {
-      onSave({ title, content });
-      toast.success("Journal entry added!");
+      await onSave({ title, content });
       setContent("");
       setTitle(today);
       setErrors({});
+      toast.success("Journal entry added!");
     } catch {
       toast.error("Failed to save entry.");
     }

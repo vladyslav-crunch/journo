@@ -13,17 +13,24 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [yearFilter, setYearFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState("all");
-  const [visibleCount, setVisibleCount] = useState(5); // 👈 global visible count
+  const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
     if (token) fetchEntries(token).then(setEntries);
   }, [token]);
 
-  const handleSave = async (entry: JournalEntryCreate) => {
-    if (!token) return;
+const handleSave = async (entry: JournalEntryCreate) => {
+  if (!token) return;
+
+  try {
     const newEntry = await createEntry(token, entry);
     setEntries([newEntry, ...entries]);
-  };
+  } catch {
+    console.error("Failed to save entry:");
+    throw new Error("Save failed"); 
+  }
+};
+
 
   const filteredEntries = entries
     .filter((entry) => {
@@ -59,7 +66,6 @@ export default function Dashboard() {
     );
   };
 
-  // 🔢 Apply global pagination across all groups
   const grouped = groupByMonth(filteredEntries);
   let totalShown = 0;
   const visibleGroups: [string, JournalEntry[]][] = [];
@@ -109,8 +115,6 @@ export default function Dashboard() {
           <JournalGroup key={month} month={month} entries={groupEntries} />
         ))
       )}
-
-      {/* 🔽 Load More button at bottom (global) */}
       {visibleCount < filteredEntries.length && (
         <div className="flex justify-center my-6">
           <button

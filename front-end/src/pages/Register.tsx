@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { registerUser } from "../api/journal";
-import { useNavigate, Link } from "react-router-dom";
+import { registerUser } from "../api/auth";
+import { Link } from "react-router-dom";
 import { z } from "zod";
+import { useAuth } from "../context/AuthContext";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email format."),
@@ -20,7 +21,8 @@ export default function Register() {
     {}
   );
   const [serverError, setServerError] = useState("");
-  const navigate = useNavigate();
+
+  const { login } = useAuth(); // ✅ get login from context
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +42,10 @@ export default function Register() {
 
     try {
       const res = await registerUser({ email, password });
-      if (res.success) {
-        navigate("/login");
+
+      // ✅ If backend returns a token
+      if (res.token) {
+        login(res.token); // Automatically logs in and redirects
       } else {
         setServerError(res.message || "Registration failed");
       }

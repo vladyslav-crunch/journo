@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { loginUser } from "../api/journal";
+import { loginUser } from "../api/auth";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 

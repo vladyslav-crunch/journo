@@ -1,23 +1,21 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { validateToken } from "../api/journal";
+import { validateToken } from "../api/auth";
 import { type ReactNode } from "react";
+import { setLogout } from "../utils/logoutHelper";
 type AuthContextType = {
-  user: any;
   token: string | null;
   login: (token: string) => void;
   logout: () => void;
 };
 
 export const AuthContext = createContext<AuthContextType>({
-  user: null,
   token: null,
   login: () => {},
   logout: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const navigate = useNavigate();
 
@@ -28,7 +26,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    setUser(null);
     setToken(null);
     localStorage.removeItem("token");
     navigate("/login");
@@ -39,8 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!token) return;
 
       try {
-        const userData = await validateToken(token);
-        setUser(userData);
+        await validateToken(token);
       } catch {
         logout();
       }
@@ -49,11 +45,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkToken();
   }, [token]);
 
+  useEffect(() => {
+    setLogout(logout);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext); // ✅ export this
+export const useAuth = () => useContext(AuthContext);

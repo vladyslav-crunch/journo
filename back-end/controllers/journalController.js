@@ -24,6 +24,26 @@ export const getEntries = async (req, res) => {
   }
 };
 
+export const getEntry = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const entry = await JournalEntry.findOne({
+      _id: id,
+      userId: req.userId,
+    });
+
+    if (!entry) {
+      return res.status(404).json({ message: "Entry not found." });
+    }
+
+    res.json(entry);
+  } catch (err) {
+    console.error("Get entry by ID error:", err);
+    res.status(500).json({ message: "Failed to fetch entry." });
+  }
+};
+
 export const createEntry = async (req, res) => {
   try {
     const parsed = createSchema.parse(req.body);

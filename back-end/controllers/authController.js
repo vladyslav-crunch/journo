@@ -18,7 +18,11 @@ export const register = async (req, res) => {
     const user = new User({ email, password });
     await user.save();
 
-    res.status(201).json({ message: "User created." });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+    });
+
+    res.status(201).json({ token });
   } catch (err) {
     if (err.name === "ZodError") {
       return res.status(400).json({ message: err.errors[0].message });
@@ -38,7 +42,7 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+      expiresIn: process.env.JWT_EXPIRES_IN || "1d",
     });
 
     res.json({ token });

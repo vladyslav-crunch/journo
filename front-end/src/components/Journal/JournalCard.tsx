@@ -16,8 +16,8 @@ export default function JournalCard({ entry }: { entry: JournalEntry }) {
       </div>
 
       <div className="text-right text-xs text-gray-500 whitespace-nowrap ml-4">
-        <p>Created: {format(new Date(entry.createdAt), "yyyy-MM-dd")}</p>
-        <p>Updated: {format(new Date(entry.updatedAt), "yyyy-MM-dd")}</p>
+        <p>Created: {format(new Date(entry.createdAt), "yyyy-MM-dd HH:mm")}</p>
+        <p>Modified: {format(new Date(entry.updatedAt), "yyyy-MM-dd HH:mm")}</p>
       </div>
     </Link>
   );

@@ -25,7 +25,7 @@ export default function EntryDateInput({
   ) : (
     <div className="flex justify-between text-sm text-gray-500 pt-2">
       <div />
-      <p>Created: {format(new Date(createdAt), "yyyy-MM-dd")}</p>
+      <p>{format(new Date(createdAt), "yyyy-MM-dd")}</p>
     </div>
   );
 }
